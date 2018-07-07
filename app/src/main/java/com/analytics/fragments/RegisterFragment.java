@@ -102,7 +102,7 @@ public class RegisterFragment extends Fragment {
         if (err == 0) {
 
             User user = new User();
-            user.setName(name);
+            user.setLastName(name);
             user.setEmail(email);
             user.setPassword(password);
 

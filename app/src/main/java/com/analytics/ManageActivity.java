@@ -1,6 +1,7 @@
 package com.analytics;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.design.widget.FloatingActionButton;
@@ -15,15 +16,20 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.CheckBox;
+import android.widget.TextView;
 import android.widget.Toast;
 
+import com.analytics.utils.Constants;
 import com.learn2crack.R;
 
 public class ManageActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
+    private SharedPreferences mSharedPreferences;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        initSharedPreferences();
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_manage);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
@@ -66,6 +72,10 @@ public class ManageActivity extends AppCompatActivity
 
     }
 
+    private void initSharedPreferences() {
+        mSharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+    }
+
     @Override
     public void onBackPressed() {
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
@@ -76,10 +86,17 @@ public class ManageActivity extends AppCompatActivity
         }
     }
 
+
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.manage, menu);
+        getMenuInflater().inflate(R.menu.main_activity2, menu);
+        TextView userName = (TextView) findViewById(R.id.userName);
+        userName.setText(mSharedPreferences.getString(Constants.LASTNAME, null)
+                + " " + mSharedPreferences.getString(Constants.FIRSTNAME, null));
+        TextView userId = (TextView) findViewById(R.id.userid);
+        userId.setText(mSharedPreferences.getString(Constants.EMAIL, null));
         return true;
     }
 
@@ -97,6 +114,7 @@ public class ManageActivity extends AppCompatActivity
 
         return super.onOptionsItemSelected(item);
     }
+
 
     @SuppressWarnings("StatementWithEmptyBody")
     @Override

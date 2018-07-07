@@ -10,6 +10,7 @@ import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
 import android.support.design.widget.Snackbar;
 import android.support.design.widget.TextInputLayout;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -145,18 +146,30 @@ public class LoginFragment extends Fragment {
 
 
 
-    private void handleResponse(Response response) {
+    private void handleResponse(User user) {
 
         mProgressBar.setVisibility(View.GONE);
 
         SharedPreferences.Editor editor = mSharedPreferences.edit();
-        editor.putString(Constants.TOKEN,response.getToken());
-        editor.putString(Constants.EMAIL,response.getMessage());
+        editor.putString(Constants.ID, user.getId() + "");
+        editor.putString(Constants.EMAIL, user.getEmail());
+        editor.putString(Constants.LASTNAME, user.getLastName());
+        editor.putString(Constants.FIRSTNAME, user.getFirstName());
         editor.apply();
+        //editor.putString(Constants.TOKEN,response.getToken());
+        //editor.putString(Constants.EMAIL,response.getMessage());
         //User user = response.getUser();
         //showSnackBarMessage(user.toString());
         mEtEmail.setText(null);
         mEtPassword.setText(null);
+        Log.println(Log.INFO,"USERID",user.getId() + "");
+        Log.println(Log.INFO,"USERACCOUNTLEVEL",user.getAccountLevel() + "");
+        Log.println(Log.INFO,"USERLASTNAME",user.getLastName() + "");
+        Log.println(Log.INFO,"USERFIRSTNAME",user.getFirstName() + "");
+        Log.println(Log.INFO,"USEREMAIL",user.getEmail() + "");
+
+        //Log.println(Log.INFO,"TOKEN",response.getToken());
+
 
 
         Intent intent = new Intent(getActivity(), MainActivity2.class);

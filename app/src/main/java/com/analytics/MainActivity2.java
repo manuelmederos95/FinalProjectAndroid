@@ -1,6 +1,7 @@
 package com.analytics;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
@@ -19,6 +20,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
 
+import com.analytics.utils.Constants;
 import com.learn2crack.R;
 
 import java.util.Random;
@@ -34,9 +36,12 @@ import com.jjoe64.graphview.series.LineGraphSeries;*/
 public class MainActivity2 extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
+    private SharedPreferences mSharedPreferences;
+
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        initSharedPreferences();
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main2);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
@@ -119,6 +124,9 @@ public class MainActivity2 extends AppCompatActivity
 
     }
 
+    private void initSharedPreferences() {
+        mSharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+    }
 
 
     public void onSnapGraph(View view){
@@ -149,9 +157,10 @@ public class MainActivity2 extends AppCompatActivity
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.main_activity2, menu);
         TextView userName = (TextView) findViewById(R.id.userName);
-        userName.setText("MEDEROS Manuel");
+        userName.setText(mSharedPreferences.getString(Constants.LASTNAME, null)
+                + " " + mSharedPreferences.getString(Constants.FIRSTNAME, null));
         TextView userId = (TextView) findViewById(R.id.userid);
-        userId.setText("manuel@gmail.com");
+        userId.setText(mSharedPreferences.getString(Constants.EMAIL, null));
         return true;
     }
 

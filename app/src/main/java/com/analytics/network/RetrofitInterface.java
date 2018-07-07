@@ -16,7 +16,7 @@ public interface RetrofitInterface {
 
     @FormUrlEncoded
     @POST("loginfromandroid")
-    Observable<Response> login(@Field("email") String email, @Field("password") String password );
+    Observable<User> login(@Field("email") String email, @Field("password") String password );
     //Observable<Response> login();
 
     @POST("users")
