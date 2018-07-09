@@ -1,6 +1,7 @@
 package com.analytics.network;
 
 import com.analytics.model.Project;
+import com.analytics.model.ProjectList;
 import com.analytics.model.Response;
 import com.analytics.model.User;
 
@@ -27,7 +28,7 @@ public interface RetrofitInterface {
 
     @FormUrlEncoded
     @POST("getprojectforandroid")
-    Observable< List<Project> > getProjects(@Field("id") BigInteger id);
+    Observable<ProjectList> getProjects(@Field("id") BigInteger id);
 
     @POST("users")
     Observable<Response> register(@Body User user);

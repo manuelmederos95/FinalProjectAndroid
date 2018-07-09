@@ -22,6 +22,7 @@ import android.view.View;
 import android.widget.TextView;
 
 import com.analytics.model.Project;
+import com.analytics.model.ProjectList;
 import com.analytics.model.Response;
 import com.analytics.model.User;
 import com.analytics.network.NetworkUtil;
@@ -157,28 +158,27 @@ public class ReportingActivity extends AppCompatActivity
                 .subscribe(this::handleResponse, this::handleError));
     }
 
-    private void handleResponse(List<Project> projects) {
+    private void handleResponse(ProjectList projects) {
 
-    /**
-        mProgressBar.setVisibility(View.GONE);
-        SharedPreferences.Editor editor = mSharedPreferences.edit();
-        editor.putString(Constants.ID, user.getId() + "");
-        editor.putString(Constants.EMAIL, user.getEmail());
-        editor.putString(Constants.LASTNAME, user.getLastName());
-        editor.putString(Constants.FIRSTNAME, user.getFirstName());
-        editor.apply();
-        mEtEmail.setText(null);
-        mEtPassword.setText(null);
-        Log.println(Log.INFO,"USERID",user.getId() + "");
-        Log.println(Log.INFO,"USERACCOUNTLEVEL",user.getAccountLevel() + "");
-        Log.println(Log.INFO,"USERLASTNAME",user.getLastName() + "");
-        Log.println(Log.INFO,"USERFIRSTNAME",user.getFirstName() + "");
-        Log.println(Log.INFO,"USEREMAIL",user.getEmail() + "");
-        //Log.println(Log.INFO,"TOKEN",response.getToken());
-        Intent intent = new Intent(getActivity(), ReportingActivity.class);
-        startActivity(intent);*/
+        Log.println(Log.INFO,"PROJECTS_OWN", "*****" + projects.getProjectOwn() + "**************************");
+        Log.println(Log.INFO,"PROJECTS_COLLABORATIONS", "*****" + projects.getCollaborations() + "**************************");
 
-        Log.println(Log.INFO,"PROJECT", projects.get(1) + "**************************");
+        List <Project> projectOwn = projects.getProjectOwn();
+        List <Project> projectCollaborations = projects.getCollaborations();
+        if(projectOwn.size() != 0) {
+            for (Project project: projectOwn) {
+                Log.println(Log.INFO,"ID:", String.valueOf(project.getId()));
+                Log.println(Log.INFO,"NAME:", String.valueOf(project.getName()));
+                Log.println(Log.INFO,"URL_FOLLOWED:", String.valueOf(project.getUrlfollowed()));
+            }
+        }
+        if(projectCollaborations.size() != 0) {
+            for (Project project: projectCollaborations) {
+                Log.println(Log.INFO,"ID:", String.valueOf(project.getId()));
+                Log.println(Log.INFO,"NAME:", String.valueOf(project.getName()));
+                Log.println(Log.INFO,"URL_FOLLOWED:", String.valueOf(project.getUrlfollowed()));
+            }
+        }
 
     }
 
