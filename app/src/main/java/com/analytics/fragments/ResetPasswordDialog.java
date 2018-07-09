@@ -17,6 +17,7 @@ import android.widget.TextView;
 import com.analytics.MainActivity;
 import com.analytics.model.Response;
 import com.analytics.model.User;
+import com.analytics.utils.Constants;
 import com.analytics.utils.Validation;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -158,7 +159,7 @@ public class ResetPasswordDialog extends DialogFragment {
 
     private void resetPasswordInitProgress(String email) {
 
-        mSubscriptions.add(NetworkUtil.getRetrofit().resetPasswordInit(email)
+        mSubscriptions.add(NetworkUtil.getRetrofit(Constants.SIGN_URL).resetPasswordInit(email)
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeOn(Schedulers.io())
                 .subscribe(this::handleResponse,this::handleError));
@@ -166,7 +167,7 @@ public class ResetPasswordDialog extends DialogFragment {
 
     private void resetPasswordFinishProgress(User user) {
 
-        mSubscriptions.add(NetworkUtil.getRetrofit().resetPasswordFinish(mEmail,user)
+        mSubscriptions.add(NetworkUtil.getRetrofit(Constants.SIGN_URL).resetPasswordFinish(mEmail,user)
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeOn(Schedulers.io())
                 .subscribe(this::handleResponse,this::handleError));

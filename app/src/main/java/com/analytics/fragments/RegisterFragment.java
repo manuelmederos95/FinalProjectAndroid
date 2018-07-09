@@ -16,6 +16,7 @@ import android.widget.TextView;
 
 import com.analytics.model.Response;
 import com.analytics.model.User;
+import com.analytics.utils.Constants;
 import com.analytics.utils.Validation;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -124,7 +125,7 @@ public class RegisterFragment extends Fragment {
 
     private void registerProcess(User user) {
 
-        mSubscriptions.add(NetworkUtil.getRetrofit().register(user)
+        mSubscriptions.add(NetworkUtil.getRetrofit(Constants.SIGN_URL).register(user)
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeOn(Schedulers.io())
                 .subscribe(this::handleResponse,this::handleError));

@@ -1,7 +1,11 @@
 package com.analytics.network;
 
+import com.analytics.model.Project;
 import com.analytics.model.Response;
 import com.analytics.model.User;
+
+import java.math.BigInteger;
+import java.util.List;
 
 import retrofit2.http.Body;
 import retrofit2.http.Field;
@@ -10,6 +14,7 @@ import retrofit2.http.GET;
 import retrofit2.http.POST;
 import retrofit2.http.PUT;
 import retrofit2.http.Path;
+import retrofit2.http.Url;
 import rx.Observable;
 
 public interface RetrofitInterface {
@@ -18,6 +23,11 @@ public interface RetrofitInterface {
     @POST("loginfromandroid")
     Observable<User> login(@Field("email") String email, @Field("password") String password );
     //Observable<Response> login();
+
+
+    @FormUrlEncoded
+    @POST("getprojectforandroid")
+    Observable< List<Project> > getProjects(@Field("id") BigInteger id);
 
     @POST("users")
     Observable<Response> register(@Body User user);

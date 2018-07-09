@@ -123,7 +123,7 @@ public class ManageActivity extends AppCompatActivity
         int id = item.getItemId();
 
         if (id == R.id.nav_main_menu) {
-            Intent intent = new Intent(this, MainActivity2.class);
+            Intent intent = new Intent(this, ReportingActivity.class);
             startActivity(intent);
         } else if (id == R.id.nav_manage) {
             /**Intent intent = new Intent(this, ManageActivity.class);
@@ -151,7 +151,7 @@ public class ManageActivity extends AppCompatActivity
 
         Toast.makeText(this, "Saved",
                 Toast.LENGTH_SHORT).show();
-        Intent intent = new Intent(this, MainActivity2.class);
+        Intent intent = new Intent(this, ReportingActivity.class);
         startActivity(intent);
     }
 }

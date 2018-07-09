@@ -15,16 +15,31 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
 
+import com.analytics.model.Project;
+import com.analytics.model.Response;
+import com.analytics.model.User;
+import com.analytics.network.NetworkUtil;
 import com.analytics.utils.Constants;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.learn2crack.R;
 
+import java.io.IOException;
+import java.math.BigInteger;
+import java.util.List;
 import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
+
+import retrofit2.adapter.rxjava.HttpException;
+import rx.android.schedulers.AndroidSchedulers;
+import rx.schedulers.Schedulers;
+import rx.subscriptions.CompositeSubscription;
 
 /**import com.jjoe64.graphview.GraphView;
 import com.jjoe64.graphview.series.DataPoint;
@@ -33,15 +48,19 @@ import com.jjoe64.graphview.series.LineGraphSeries;*/
 
 
 
-public class MainActivity2 extends AppCompatActivity
+public class ReportingActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
     private SharedPreferences mSharedPreferences;
+    private CompositeSubscription mSubscriptions;
 
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         initSharedPreferences();
+        mSubscriptions = new CompositeSubscription();
+        initialisationProcess();
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main2);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
@@ -128,6 +147,64 @@ public class MainActivity2 extends AppCompatActivity
         mSharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
     }
 
+    private void initialisationProcess() {
+
+        String idSave = mSharedPreferences.getString(Constants.ID, "0");
+        BigInteger id = BigInteger.valueOf(Integer.parseInt(idSave));
+        mSubscriptions.add(NetworkUtil.getRetrofit(Constants.REPORTING_URL).getProjects(id)
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeOn(Schedulers.io())
+                .subscribe(this::handleResponse, this::handleError));
+    }
+
+    private void handleResponse(List<Project> projects) {
+
+    /**
+        mProgressBar.setVisibility(View.GONE);
+        SharedPreferences.Editor editor = mSharedPreferences.edit();
+        editor.putString(Constants.ID, user.getId() + "");
+        editor.putString(Constants.EMAIL, user.getEmail());
+        editor.putString(Constants.LASTNAME, user.getLastName());
+        editor.putString(Constants.FIRSTNAME, user.getFirstName());
+        editor.apply();
+        mEtEmail.setText(null);
+        mEtPassword.setText(null);
+        Log.println(Log.INFO,"USERID",user.getId() + "");
+        Log.println(Log.INFO,"USERACCOUNTLEVEL",user.getAccountLevel() + "");
+        Log.println(Log.INFO,"USERLASTNAME",user.getLastName() + "");
+        Log.println(Log.INFO,"USERFIRSTNAME",user.getFirstName() + "");
+        Log.println(Log.INFO,"USEREMAIL",user.getEmail() + "");
+        //Log.println(Log.INFO,"TOKEN",response.getToken());
+        Intent intent = new Intent(getActivity(), ReportingActivity.class);
+        startActivity(intent);*/
+
+        Log.println(Log.INFO,"PROJECT", projects.get(1) + "**************************");
+
+    }
+
+    private void handleError(Throwable error) {
+
+
+        if (error instanceof HttpException) {
+
+            Gson gson = new GsonBuilder().create();
+
+            try {
+
+                String errorBody = ((HttpException) error).response().errorBody().string();
+                //Response response = gson.fromJson(errorBody,Response.class);
+                //showSnackBarMessage(response.getMessage());
+                //showSnackBarMessage("Response Error !");
+                Log.println(Log.ERROR,"ERROR1",errorBody );
+
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        } else {
+            Log.println(Log.ERROR,"ERROR2",error.toString() );
+        }
+    }
+
 
     public void onSnapGraph(View view){
         /**GraphView graph = (GraphView) findViewById(R.id.graph1);
@@ -186,7 +263,7 @@ public class MainActivity2 extends AppCompatActivity
         int id = item.getItemId();
 
         if (id == R.id.nav_main_menu) {
-            /**Intent intent = new Intent(this, MainActivity2.class);
+            /**Intent intent = new Intent(this, ReportingActivity.class);
             startActivity(intent);*/
         } else if (id == R.id.nav_manage) {
             Intent intent = new Intent(this, ManageActivity.class);

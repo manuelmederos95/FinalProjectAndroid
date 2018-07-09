@@ -13,17 +13,20 @@ import rx.schedulers.Schedulers;
 
 public class NetworkUtil {
 
-    public static RetrofitInterface getRetrofit(){
+    public static RetrofitInterface getRetrofit(String URL){
 
         RxJavaCallAdapterFactory rxAdapter = RxJavaCallAdapterFactory.createWithScheduler(Schedulers.io());
 
         return new Retrofit.Builder()
-                .baseUrl(Constants.BASE_URL)
+                .baseUrl(URL)
                 .addCallAdapterFactory(rxAdapter)
                 .addConverterFactory(GsonConverterFactory.create())
                 .build().create(RetrofitInterface.class);
 
     }
+
+
+
 
 
     public static RetrofitInterface getRetrofit(String email, String password) {
@@ -45,14 +48,14 @@ public class NetworkUtil {
         RxJavaCallAdapterFactory rxAdapter = RxJavaCallAdapterFactory.createWithScheduler(Schedulers.io());
 
         return new Retrofit.Builder()
-                .baseUrl(Constants.BASE_URL)
+                .baseUrl(Constants.SIGN_URL)
                 .client(httpClient.build())
                 .addCallAdapterFactory(rxAdapter)
                 .addConverterFactory(GsonConverterFactory.create())
                 .build().create(RetrofitInterface.class);
     }
 
-    public static RetrofitInterface getRetrofit(String token) {
+    /**public static RetrofitInterface getRetrofit(String token) {
 
         OkHttpClient.Builder httpClient = new OkHttpClient.Builder();
 
@@ -69,10 +72,10 @@ public class NetworkUtil {
         RxJavaCallAdapterFactory rxAdapter = RxJavaCallAdapterFactory.createWithScheduler(Schedulers.io());
 
         return new Retrofit.Builder()
-                .baseUrl(Constants.BASE_URL)
+                .baseUrl(Constants.SIGN_URL)
                 .client(httpClient.build())
                 .addCallAdapterFactory(rxAdapter)
                 .addConverterFactory(GsonConverterFactory.create())
                 .build().create(RetrofitInterface.class);
-    }
+    }*/
 }

@@ -30,7 +30,7 @@
             android:name="com.analytics.ProfileActivity"
             android:theme="@style/AppTheme.Profile"/>
         <activity
-            android:name="com.analytics.MainActivity2"
+            android:name="com.analytics.ReportingActivity"
             android:label="@string/title_activity_main2"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity

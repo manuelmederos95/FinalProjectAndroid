@@ -1,6 +1,5 @@
 package com.analytics.fragments;
 
-import android.app.AlertDialog;
 import android.app.Fragment;
 import android.app.FragmentTransaction;
 import android.content.Intent;
@@ -19,8 +18,7 @@ import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
-import com.analytics.MainActivity2;
-import com.analytics.ProfileActivity;
+import com.analytics.ReportingActivity;
 import com.analytics.model.Response;
 import com.analytics.model.User;
 import com.analytics.network.NetworkUtil;
@@ -127,13 +125,13 @@ public class LoginFragment extends Fragment {
     private void loginProcess(String email, String password) {
 
         //mSubscriptions.add(NetworkUtil.getRetrofit(email, password).login()
-        mSubscriptions.add(NetworkUtil.getRetrofit().login(email, password)
+        mSubscriptions.add(NetworkUtil.getRetrofit(Constants.SIGN_URL).login(email, password)
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeOn(Schedulers.io())
                 .subscribe(this::handleResponse,this::handleError));
 
         /**if(email.equals("manuel.mederos95@gmail.com") && password.equals("Red.foul1")) {
-            Intent intent = new Intent(getActivity(), MainActivity2.class);
+            Intent intent = new Intent(getActivity(), ReportingActivity.class);
             startActivity(intent);
         }
         else{
@@ -172,7 +170,7 @@ public class LoginFragment extends Fragment {
 
 
 
-        Intent intent = new Intent(getActivity(), MainActivity2.class);
+        Intent intent = new Intent(getActivity(), ReportingActivity.class);
         startActivity(intent);
 
     }
