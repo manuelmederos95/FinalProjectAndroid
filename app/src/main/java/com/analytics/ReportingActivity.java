@@ -195,6 +195,7 @@ public class ReportingActivity extends AppCompatActivity
                 //Response response = gson.fromJson(errorBody,Response.class);
                 //showSnackBarMessage(response.getMessage());
                 //showSnackBarMessage("Response Error !");
+                //Test
                 Log.println(Log.ERROR,"ERROR1",errorBody );
 
             } catch (IOException e) {
