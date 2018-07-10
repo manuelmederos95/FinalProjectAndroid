@@ -215,6 +215,7 @@ public class ReportingActivity extends AppCompatActivity
 
     private void initialiseStats(ProjectList projects) {
         Project project = projects.getProjectOwn().get(0);
+        Log.println(Log.INFO,"IDSEND", String.valueOf(project.getId()));
         mSubscriptions.add(NetworkUtil.getRetrofit(Constants.PROJECTS_URL).getAllStats(project.getId())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeOn(Schedulers.io())
@@ -238,7 +239,7 @@ public class ReportingActivity extends AppCompatActivity
             try {
 
                 String errorBody = ((HttpException) error).response().errorBody().string();
-                Log.println(Log.ERROR,"ERRORSTAT1",errorBody );
+                Log.println(Log.ERROR,"ERRORSTAT1","\n" + errorBody );
 
             } catch (IOException e) {
                 e.printStackTrace();

@@ -31,8 +31,9 @@ public interface RetrofitInterface {
     @POST("getprojectforandroid")
     Observable<ProjectList> getProjects(@Field("id") BigInteger id);
 
-    @POST("getstatforandroid/{projectID}")
-    Observable<List<Stats>> getAllStats(@Path("projectID") BigInteger projectID);
+    @FormUrlEncoded
+    @POST("getstatforandroid")
+    Observable<List<Stats>> getAllStats(@Field("projectID") BigInteger projectID);
 
 
     /********************************************************************************/
