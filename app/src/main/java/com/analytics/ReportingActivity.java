@@ -277,13 +277,16 @@ public class ReportingActivity extends AppCompatActivity
             Log.println(Log.INFO,"DATE:", stat.getCreatedAt());
         }
 
-        updateVisualStats(stats);
+        updateEventStats(stats, "index");
+        updateCategoryStats(stats, "page");
     }
 
 
-    private void updateVisualStats(List<Stats> stats) {
 
-        String eventName = "index";
+
+    private void updateEventStats(List<Stats> stats, String eventName) {
+
+
         long allEvents = StatsCount.countAllEventsByEventName(stats,eventName);
         long todayEvents = StatsCount.countTodayEventsByEventName(stats,eventName);
         long thisWeekEvents = StatsCount.countWeekEventsByEventName(stats,eventName);
@@ -291,15 +294,37 @@ public class ReportingActivity extends AppCompatActivity
         TextView eventLayoutTitle = (TextView) findViewById(R.id.eventLayoutTitle);
         eventLayoutTitle.setText("Event Name:" + eventName);
         TextView eventAllNb = (TextView) findViewById(R.id.eventAllNb);
-        TextView evenTodayNb = (TextView) findViewById(R.id.eventTodayNb);
+        TextView eventTodayNb = (TextView) findViewById(R.id.eventTodayNb);
         TextView eventWeekNb = (TextView) findViewById(R.id.eventWeekNb);
         TextView eventMontNb = (TextView) findViewById(R.id.eventMonthNb);
 
         eventAllNb.setText(String.valueOf(allEvents));
-        evenTodayNb.setText(String.valueOf(todayEvents));
+        eventTodayNb.setText(String.valueOf(todayEvents));
         eventWeekNb.setText(String.valueOf(thisWeekEvents));
         eventMontNb.setText(String.valueOf(thisMonthEvents));
     }
+
+    private void updateCategoryStats(List<Stats> stats, String categoryName) {
+        long allEvents = StatsCount.countAllCategoriesByCategory(stats,categoryName);
+        long todayEvents = StatsCount.countTodayCategoriesByCategory(stats,categoryName);
+        long thisWeekEvents = StatsCount.countWeekCategoriesByCategory(stats,categoryName);
+        long thisMonthEvents = StatsCount.countMonthCategoriesByCategory(stats,categoryName);
+
+        TextView categoryLayoutTitle = (TextView) findViewById(R.id.categoryLayoutTitle);
+        categoryLayoutTitle.setText("Event Name:" + categoryName);
+        TextView categoryAllNb = (TextView) findViewById(R.id.categoryAllNb);
+        TextView categoryTodayNb = (TextView) findViewById(R.id.categoryTodayNb);
+        TextView categoryWeekNb = (TextView) findViewById(R.id.categoryWeekNb);
+        TextView categoryMontNb = (TextView) findViewById(R.id.categoryMonthNb);
+
+        categoryAllNb.setText(String.valueOf(allEvents));
+        categoryTodayNb.setText(String.valueOf(todayEvents));
+        categoryWeekNb.setText(String.valueOf(thisWeekEvents));
+        categoryMontNb.setText(String.valueOf(thisMonthEvents));
+    }
+
+
+
 
 
 
