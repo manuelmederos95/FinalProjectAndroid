@@ -3,6 +3,7 @@ package com.analytics.network;
 import com.analytics.model.Project;
 import com.analytics.model.ProjectList;
 import com.analytics.model.Response;
+import com.analytics.model.Stats;
 import com.analytics.model.User;
 
 import java.math.BigInteger;
@@ -30,6 +31,11 @@ public interface RetrofitInterface {
     @POST("getprojectforandroid")
     Observable<ProjectList> getProjects(@Field("id") BigInteger id);
 
+    @POST("getstatforandroid/{projectID}")
+    Observable<List<Stats>> getAllStats(@Path("projectID") BigInteger projectID);
+
+
+    /********************************************************************************/
     @POST("users")
     Observable<Response> register(@Body User user);
 

@@ -4,6 +4,9 @@ import java.util.List;
 
 public class ProjectList {
 
+    private List<Project> projectOwn;
+    private List<Project> collaborations;
+
     public List<Project> getProjectOwn() {
         return projectOwn;
     }
@@ -20,7 +23,6 @@ public class ProjectList {
         this.collaborations = collaborations;
     }
 
-    private List<Project> projectOwn;
-    private List<Project> collaborations;
+
 
 }

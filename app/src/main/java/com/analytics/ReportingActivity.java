@@ -24,6 +24,7 @@ import android.widget.TextView;
 import com.analytics.model.Project;
 import com.analytics.model.ProjectList;
 import com.analytics.model.Response;
+import com.analytics.model.Stats;
 import com.analytics.model.User;
 import com.analytics.network.NetworkUtil;
 import com.analytics.utils.Constants;
@@ -144,6 +145,8 @@ public class ReportingActivity extends AppCompatActivity
 
     }
 
+
+
     private void initSharedPreferences() {
         mSharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
     }
@@ -157,6 +160,8 @@ public class ReportingActivity extends AppCompatActivity
                 .subscribeOn(Schedulers.io())
                 .subscribe(this::handleResponse, this::handleError));
     }
+
+
 
     private void handleResponse(ProjectList projects) {
 
@@ -179,6 +184,8 @@ public class ReportingActivity extends AppCompatActivity
                 Log.println(Log.INFO,"URL_FOLLOWED:", String.valueOf(project.getUrlfollowed()));
             }
         }
+
+        initialiseStats(projects);
 
     }
 
@@ -203,6 +210,41 @@ public class ReportingActivity extends AppCompatActivity
             }
         } else {
             Log.println(Log.ERROR,"ERROR2",error.toString() );
+        }
+    }
+
+    private void initialiseStats(ProjectList projects) {
+        Project project = projects.getProjectOwn().get(0);
+        mSubscriptions.add(NetworkUtil.getRetrofit(Constants.PROJECTS_URL).getAllStats(project.getId())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeOn(Schedulers.io())
+                .subscribe(this::handleResponseStats, this::handleErrorStats));
+    }
+
+    private void handleResponseStats(List<Stats> stats) {
+        for (Stats stat: stats) {
+            Log.println(Log.INFO,"ID:", String.valueOf(stat.getId()));
+            Log.println(Log.INFO,"BASEURL:", stat.getBaseurl());
+            Log.println(Log.INFO,"ROUTE:", stat.getRoute());
+        }
+    }
+
+    private void handleErrorStats(Throwable error){
+
+        if (error instanceof HttpException) {
+
+            Gson gson = new GsonBuilder().create();
+
+            try {
+
+                String errorBody = ((HttpException) error).response().errorBody().string();
+                Log.println(Log.ERROR,"ERRORSTAT1",errorBody );
+
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        } else {
+            Log.println(Log.ERROR,"ERRORSTAT2",error.toString() );
         }
     }
 
