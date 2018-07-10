@@ -1,5 +1,6 @@
 package com.analytics;
 
+import android.annotation.TargetApi;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Build;
@@ -15,6 +16,7 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.ArraySet;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -23,11 +25,11 @@ import android.widget.TextView;
 
 import com.analytics.model.Project;
 import com.analytics.model.ProjectList;
-import com.analytics.model.Response;
 import com.analytics.model.Stats;
-import com.analytics.model.User;
+import com.analytics.model.StatsList;
 import com.analytics.network.NetworkUtil;
 import com.analytics.utils.Constants;
+import com.analytics.utils.StatsCount;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.learn2crack.R;
@@ -35,7 +37,7 @@ import com.learn2crack.R;
 import java.io.IOException;
 import java.math.BigInteger;
 import java.util.List;
-import java.util.Random;
+import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
 
 import retrofit2.adapter.rxjava.HttpException;
@@ -55,6 +57,7 @@ public class ReportingActivity extends AppCompatActivity
 
     private SharedPreferences mSharedPreferences;
     private CompositeSubscription mSubscriptions;
+    private StatsList statsList;
 
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     @Override
@@ -112,7 +115,7 @@ public class ReportingActivity extends AppCompatActivity
         }
         else{
             eventLayout.setVisibility(View.VISIBLE);
-            int randomNum = ThreadLocalRandom.current().nextInt(0, 100);
+            /**int randomNum = ThreadLocalRandom.current().nextInt(0, 100);
             TextView eventTodayNb = (TextView) findViewById(R.id.eventTodayNb);
             TextView eventWeekNb = (TextView) findViewById(R.id.eventWeekNb);
             TextView eventMonthNb = (TextView) findViewById(R.id.eventMonthNb);
@@ -120,7 +123,7 @@ public class ReportingActivity extends AppCompatActivity
             eventTodayNb.setText(randomNum + "");
             eventWeekNb.setText(randomNum + "");
             eventMonthNb.setText(randomNum + "");
-            eventAllNb.setText(randomNum + "");
+            eventAllNb.setText(randomNum + "");*/
         }
 
         ConstraintLayout categoryLayout = (ConstraintLayout) findViewById(R.id.categoryLayout);
@@ -163,6 +166,7 @@ public class ReportingActivity extends AppCompatActivity
 
 
 
+    @TargetApi(Build.VERSION_CODES.M)
     private void handleResponse(ProjectList projects) {
 
         Log.println(Log.INFO,"PROJECTS_OWN", "*****" + projects.getProjectOwn() + "**************************");
@@ -170,23 +174,60 @@ public class ReportingActivity extends AppCompatActivity
 
         List <Project> projectOwn = projects.getProjectOwn();
         List <Project> projectCollaborations = projects.getCollaborations();
+        SharedPreferences.Editor editor = mSharedPreferences.edit();
+        Set<String> projectNames = new ArraySet<String>();
         if(projectOwn.size() != 0) {
             for (Project project: projectOwn) {
                 Log.println(Log.INFO,"ID:", String.valueOf(project.getId()));
-                Log.println(Log.INFO,"NAME:", String.valueOf(project.getName()));
-                Log.println(Log.INFO,"URL_FOLLOWED:", String.valueOf(project.getUrlfollowed()));
+                Log.println(Log.INFO,"NAME:", project.getName());
+                Log.println(Log.INFO,"URL_FOLLOWED:", project.getUrlfollowed());
+                projectNames.add(project.getName());
             }
         }
         if(projectCollaborations.size() != 0) {
             for (Project project: projectCollaborations) {
                 Log.println(Log.INFO,"ID:", String.valueOf(project.getId()));
-                Log.println(Log.INFO,"NAME:", String.valueOf(project.getName()));
-                Log.println(Log.INFO,"URL_FOLLOWED:", String.valueOf(project.getUrlfollowed()));
+                Log.println(Log.INFO,"NAME:", project.getName());
+                Log.println(Log.INFO,"URL_FOLLOWED:", project.getUrlfollowed());
+                projectNames.add(project.getName());
             }
         }
 
-        initialiseStats(projects);
+        editor.putStringSet(Constants.PROJECTSNAME, projectNames);
+        editor.apply();
 
+        //Project projectSelected = selectedProject(projects);
+        //initialiseStats(projectSelected);
+        initialiseStats(projectOwn.get(0));
+
+    }
+
+    public Project selectedProject(ProjectList projects) {
+        String selected = mSharedPreferences.getString(Constants.PROJECTSELECTED, "null");
+        List <Project> projectOwn = projects.getProjectOwn();
+        List <Project> projectCollaborations = projects.getCollaborations();
+        if(selected.equals(null)) {
+            if(projectOwn.size() != 0) {
+                mSharedPreferences.edit().putString(Constants.PROJECTSELECTED, projectOwn.get(0).getName());
+                return projectOwn.get(0);
+            }
+
+            else {
+                if(projectCollaborations.size() != 0) {
+                    mSharedPreferences.edit().putString(Constants.PROJECTSELECTED, projectOwn.get(0).getName());
+                    return projectCollaborations.get(0);
+                }
+            }
+            }
+            else {
+            for (Project project: projectOwn) {
+                if(project.getName().equals(selected)) return project;
+            }
+            for (Project project: projectCollaborations) {
+                if(project.getName().equals(selected)) return project;
+            }
+        }
+        return null;
     }
 
     private void handleError(Throwable error) {
@@ -202,7 +243,6 @@ public class ReportingActivity extends AppCompatActivity
                 //Response response = gson.fromJson(errorBody,Response.class);
                 //showSnackBarMessage(response.getMessage());
                 //showSnackBarMessage("Response Error !");
-                //Test
                 Log.println(Log.ERROR,"ERROR1",errorBody );
 
             } catch (IOException e) {
@@ -213,22 +253,56 @@ public class ReportingActivity extends AppCompatActivity
         }
     }
 
-    private void initialiseStats(ProjectList projects) {
-        Project project = projects.getProjectOwn().get(0);
-        Log.println(Log.INFO,"IDSEND", String.valueOf(project.getId()));
+    private void initialiseStats(Project project) {
+        Log.println(Log.INFO, "STAT", "*******************************************");
+        Log.println(Log.INFO, "STATID", String.valueOf(project.getId()));
+        Log.println(Log.INFO, "STATNAME", String.valueOf(project.getName()));
         mSubscriptions.add(NetworkUtil.getRetrofit(Constants.PROJECTS_URL).getAllStats(project.getId())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeOn(Schedulers.io())
                 .subscribe(this::handleResponseStats, this::handleErrorStats));
+
     }
 
+
     private void handleResponseStats(List<Stats> stats) {
+
         for (Stats stat: stats) {
             Log.println(Log.INFO,"ID:", String.valueOf(stat.getId()));
             Log.println(Log.INFO,"BASEURL:", stat.getBaseurl());
             Log.println(Log.INFO,"ROUTE:", stat.getRoute());
+            Log.println(Log.INFO,"EVENTNAME:", stat.getEventname());
+            Log.println(Log.INFO,"CATEGORY:", stat.getCategory());
+            Log.println(Log.INFO,"ACTION:", stat.getAction());
+            Log.println(Log.INFO,"DATE:", stat.getCreatedAt());
         }
+
+        updateVisualStats(stats);
     }
+
+
+    private void updateVisualStats(List<Stats> stats) {
+
+        String eventName = "index";
+        long allEvents = StatsCount.countAllEventsByEventName(stats,eventName);
+        long todayEvents = StatsCount.countTodayEventsByEventName(stats,eventName);
+        long thisWeekEvents = StatsCount.countWeekEventsByEventName(stats,eventName);
+        long thisMonthEvents = StatsCount.countMonthEventsByEventName(stats,eventName);
+        TextView eventLayoutTitle = (TextView) findViewById(R.id.eventLayoutTitle);
+        eventLayoutTitle.setText("Event Name:" + eventName);
+        TextView eventAllNb = (TextView) findViewById(R.id.eventAllNb);
+        TextView evenTodayNb = (TextView) findViewById(R.id.eventTodayNb);
+        TextView eventWeekNb = (TextView) findViewById(R.id.eventWeekNb);
+        TextView eventMontNb = (TextView) findViewById(R.id.eventMonthNb);
+
+        eventAllNb.setText(String.valueOf(allEvents));
+        evenTodayNb.setText(String.valueOf(todayEvents));
+        eventWeekNb.setText(String.valueOf(thisWeekEvents));
+        eventMontNb.setText(String.valueOf(thisMonthEvents));
+    }
+
+
+
 
     private void handleErrorStats(Throwable error){
 

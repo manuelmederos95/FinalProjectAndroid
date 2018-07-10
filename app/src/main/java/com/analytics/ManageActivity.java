@@ -2,8 +2,10 @@ package com.analytics;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.support.annotation.RequiresApi;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.Snackbar;
@@ -12,15 +14,23 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.ArraySet;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.ArrayAdapter;
 import android.widget.CheckBox;
+import android.widget.Spinner;
+import android.widget.SpinnerAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.analytics.utils.Constants;
 import com.learn2crack.R;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
 
 public class ManageActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
@@ -69,6 +79,18 @@ public class ManageActivity extends AppCompatActivity
                 .getBoolean("actionCheckBox", false);
         actionCheckBox.setChecked(checked2);
 
+        Spinner spinner = (Spinner) findViewById(R.id.spinner);
+        try {
+            Set<String> projects = mSharedPreferences.getStringSet(Constants.PROJECTSNAME, null);
+            List<String> projectsList = new ArrayList<String>();
+            for (String s : projects) {
+                projectsList.add(s);
+            }
+            ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item, projectsList);
+            spinner.setAdapter(adapter);
+        }catch (Exception e) {
+            e.printStackTrace();
+        }
 
     }
 
