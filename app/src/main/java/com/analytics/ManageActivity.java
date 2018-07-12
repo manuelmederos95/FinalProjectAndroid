@@ -79,19 +79,6 @@ public class ManageActivity extends AppCompatActivity
                 .getBoolean("actionCheckBox", false);
         actionCheckBox.setChecked(checked2);
 
-        Spinner spinner = (Spinner) findViewById(R.id.spinner);
-        try {
-            Set<String> projects = mSharedPreferences.getStringSet(Constants.PROJECTSNAME, null);
-            List<String> projectsList = new ArrayList<String>();
-            for (String s : projects) {
-                projectsList.add(s);
-            }
-            ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item, projectsList);
-            spinner.setAdapter(adapter);
-        }catch (Exception e) {
-            e.printStackTrace();
-        }
-
     }
 
     private void initSharedPreferences() {

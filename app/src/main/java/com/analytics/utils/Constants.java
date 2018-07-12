@@ -13,5 +13,8 @@ public class Constants {
     public static final String FIRSTNAME = "firstname";
     public static final String PROJECTSNAME= "PROJECTSNAME";
     public static final String PROJECTSELECTED = "PROJECTSELECTED";
+    public static final String EVENTSELECTED = "EVENTSELECTED";
+    public static final String CATEGORYSELECTED = "CATEGORYSELECTED";
+    public static final String ACTIONSELECTED = "ACTIONSELECTED";
 
 }
