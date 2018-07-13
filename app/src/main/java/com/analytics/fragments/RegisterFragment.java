@@ -35,10 +35,12 @@ public class RegisterFragment extends Fragment {
     public static final String TAG = RegisterFragment.class.getSimpleName();
 
     private EditText mEtName;
+    private EditText mEtLastName;
     private EditText mEtEmail;
     private EditText mEtPassword;
     private Button   mBtRegister;
     private TextView mTvLogin;
+    private TextInputLayout mTiLastName;
     private TextInputLayout mTiName;
     private TextInputLayout mTiEmail;
     private TextInputLayout mTiPassword;
@@ -59,10 +61,12 @@ public class RegisterFragment extends Fragment {
     private void initViews(View v) {
 
         mEtName = (EditText) v.findViewById(R.id.et_name);
+        mEtLastName = (EditText) v.findViewById(R.id.et_lastname);
         mEtEmail = (EditText) v.findViewById(R.id.et_email);
         mEtPassword = (EditText) v.findViewById(R.id.et_password);
         mBtRegister = (Button) v.findViewById(R.id.btn_register);
         mTvLogin = (TextView) v.findViewById(R.id.tv_login);
+        mTiLastName = (TextInputLayout) v.findViewById(R.id.ti_lastname);
         mTiName = (TextInputLayout) v.findViewById(R.id.ti_name);
         mTiEmail = (TextInputLayout) v.findViewById(R.id.ti_email);
         mTiPassword = (TextInputLayout) v.findViewById(R.id.ti_password);
@@ -76,16 +80,23 @@ public class RegisterFragment extends Fragment {
 
         setError();
 
+        String lastname = mEtLastName.getText().toString();
         String name = mEtName.getText().toString();
         String email = mEtEmail.getText().toString();
         String password = mEtPassword.getText().toString();
 
         int err = 0;
 
+        if (!Validation.validateFields(lastname)) {
+
+            err++;
+            mTiLastName.setError("Last Name should not be empty !");
+        }
+
         if (!Validation.validateFields(name)) {
 
             err++;
-            mTiName.setError("Name should not be empty !");
+            mTiName.setError("First Name should not be empty !");
         }
 
         if (!Validation.validateEmail(email)) {
@@ -98,6 +109,12 @@ public class RegisterFragment extends Fragment {
 
             err++;
             mTiPassword.setError("Password should not be empty !");
+        }
+
+        if (!Validation.validatePassword(password)) {
+
+            err++;
+            mTiPassword.setError("Password must be between 8-100 characters long !");
         }
 
         if (err == 0) {
@@ -118,6 +135,7 @@ public class RegisterFragment extends Fragment {
 
     private void setError() {
 
+        mTiLastName.setError(null);
         mTiName.setError(null);
         mTiEmail.setError(null);
         mTiPassword.setError(null);
@@ -125,7 +143,7 @@ public class RegisterFragment extends Fragment {
 
     private void registerProcess(User user) {
 
-        mSubscriptions.add(NetworkUtil.getRetrofit(Constants.SIGN_URL).register(user)
+        mSubscriptions.add(NetworkUtil.getRetrofit(Constants.SIGN_URL).signUp(user.getFirstName(),user.getLastName(),user.getEmail(),user.getPassword(),user.getPassword())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeOn(Schedulers.io())
                 .subscribe(this::handleResponse,this::handleError));
@@ -134,7 +152,8 @@ public class RegisterFragment extends Fragment {
     private void handleResponse(Response response) {
 
         mProgressbar.setVisibility(View.GONE);
-        showSnackBarMessage(response.getMessage());
+        showSnackBarMessage(response.getMsg());
+
     }
 
     private void handleError(Throwable error) {
@@ -149,10 +168,11 @@ public class RegisterFragment extends Fragment {
 
                 String errorBody = ((HttpException) error).response().errorBody().string();
                 Response response = gson.fromJson(errorBody,Response.class);
-                showSnackBarMessage(response.getMessage());
+                showSnackBarMessage(response.getMsg());
 
-            } catch (IOException e) {
+            } catch (Exception e) {
                 e.printStackTrace();
+                showSnackBarMessage("Network Error !");
             }
         } else {
 

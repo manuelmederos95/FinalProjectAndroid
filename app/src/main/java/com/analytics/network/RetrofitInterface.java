@@ -35,6 +35,18 @@ public interface RetrofitInterface {
     @POST("getstatforandroid")
     Observable<List<Stats>> getAllStats(@Field("projectID") BigInteger projectID);
 
+    @FormUrlEncoded
+    @POST("getstatforandroid")
+    Observable<Response> signUp(@Field("firstname") String firstname,
+                                @Field("lastname") String lastname, @Field("email") String email,
+                                @Field("password") String password, @Field("password2") String password2 );
+
+    @FormUrlEncoded
+    @POST("getstatforandroid")
+    Observable<Response> resetPassword(@Field("email") String email);
+
+
+
 
     /********************************************************************************/
     @POST("users")

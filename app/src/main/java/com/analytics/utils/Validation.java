@@ -17,6 +17,15 @@ public class Validation {
         }
     }
 
+    public static boolean validatePassword(String password){
+
+        if(password.length() < 8 || password.length() > 100 ) {
+            return false;
+        } else {
+          return true;
+        }
+    }
+
     public static boolean validateEmail(String string) {
 
         if (TextUtils.isEmpty(string) || !Patterns.EMAIL_ADDRESS.matcher(string).matches()) {

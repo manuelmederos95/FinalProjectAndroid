@@ -11,6 +11,9 @@ public class User {
     private String lastname;
     private String firstname;
     private String email;
+
+
+
     private String password;
     private String created_at;
     private String newPassword;
@@ -38,7 +41,7 @@ public class User {
         this.password = password;
     }
 
-
+    public String getPassword() { return password; }
 
     public String getEmail() {
         return email;

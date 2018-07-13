@@ -160,7 +160,7 @@ public class ChangePasswordDialog extends DialogFragment {
 
                 String errorBody = ((HttpException) error).response().errorBody().string();
                 Response response = gson.fromJson(errorBody,Response.class);
-                showMessage(response.getMessage());
+                showMessage(response.getMsg());
 
             } catch (IOException e) {
                 e.printStackTrace();

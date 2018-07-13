@@ -2,12 +2,12 @@ package com.analytics.model;
 
 public class Response {
 
-    private String message;
-    private String token;
+    private String msg;
+    private String error;
 
-    public String getMessage() { return message; }
+    public String getMsg() { return msg; }
 
-    public String getToken(){
-        return token;
+    public String getError(){
+        return error;
     }
 }

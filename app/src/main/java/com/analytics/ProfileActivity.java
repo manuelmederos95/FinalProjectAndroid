@@ -123,7 +123,7 @@ public class ProfileActivity extends AppCompatActivity implements ChangePassword
 
                 String errorBody = ((HttpException) error).response().errorBody().string();
                 Response response = gson.fromJson(errorBody,Response.class);
-                showSnackBarMessage(response.getMessage());
+                showSnackBarMessage(response.getMsg());
 
             } catch (IOException e) {
                 e.printStackTrace();

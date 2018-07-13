@@ -6,6 +6,7 @@ import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.TextInputLayout;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -121,7 +122,9 @@ public class ResetPasswordDialog extends DialogFragment {
         if (err == 0) {
 
             mProgressBar.setVisibility(View.VISIBLE);
-            resetPasswordInitProgress(mEmail);
+
+
+            resetPassword(mEmail);
         }
     }
 
@@ -153,41 +156,41 @@ public class ResetPasswordDialog extends DialogFragment {
             User user = new User();
             user.setPassword(password);
             user.setToken(token);
-            resetPasswordFinishProgress(user);
+            //resetPasswordFinishProgress(user);
         }
     }
 
-    private void resetPasswordInitProgress(String email) {
+    private void resetPassword(String email) {
 
-        mSubscriptions.add(NetworkUtil.getRetrofit(Constants.SIGN_URL).resetPasswordInit(email)
+        mSubscriptions.add(NetworkUtil.getRetrofit(Constants.SIGN_URL).resetPassword(email)
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeOn(Schedulers.io())
                 .subscribe(this::handleResponse,this::handleError));
     }
 
-    private void resetPasswordFinishProgress(User user) {
+    /**private void resetPasswordFinishProgress(User user) {
 
         mSubscriptions.add(NetworkUtil.getRetrofit(Constants.SIGN_URL).resetPasswordFinish(mEmail,user)
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeOn(Schedulers.io())
                 .subscribe(this::handleResponse,this::handleError));
-    }
+    }*/
 
     private void handleResponse(Response response) {
-
+        Log.println(Log.INFO,"REACH:", "***********");
         mProgressBar.setVisibility(View.GONE);
 
         if (isInit) {
 
             isInit = false;
-            showMessage(response.getMessage());
+            showMessage(response.getMsg());
             mTiEmail.setVisibility(View.GONE);
             mTiToken.setVisibility(View.VISIBLE);
             mTiPassword.setVisibility(View.VISIBLE);
 
         } else {
 
-            mListner.onPasswordReset(response.getMessage());
+            mListner.onPasswordReset(response.getMsg());
             dismiss();
         }
     }
@@ -204,10 +207,11 @@ public class ResetPasswordDialog extends DialogFragment {
 
                 String errorBody = ((HttpException) error).response().errorBody().string();
                 Response response = gson.fromJson(errorBody,Response.class);
-                showMessage(response.getMessage());
+                showMessage(response.getMsg());
 
-            } catch (IOException e) {
+            } catch (Exception e) {
                 e.printStackTrace();
+                showMessage("Network Error !");
             }
         } else {
 
