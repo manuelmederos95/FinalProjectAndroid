@@ -1,8 +1,12 @@
 package com.analytics;
 
 import android.annotation.TargetApi;
+import android.appwidget.AppWidgetManager;
+import android.content.ComponentName;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
@@ -10,40 +14,46 @@ import android.support.annotation.RequiresApi;
 import android.support.constraint.ConstraintLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
-import android.support.design.widget.Snackbar;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.util.ArraySet;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.RemoteViews;
 import android.widget.Spinner;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.analytics.model.Project;
 import com.analytics.model.ProjectList;
 import com.analytics.model.Stats;
-import com.analytics.model.StatsList;
 import com.analytics.network.NetworkUtil;
 import com.analytics.utils.Constants;
 import com.analytics.utils.StatsCount;
+import com.github.mikephil.charting.charts.BarChart;
+import com.github.mikephil.charting.charts.LineChart;
+import com.github.mikephil.charting.data.BarData;
+import com.github.mikephil.charting.data.BarDataSet;
+import com.github.mikephil.charting.data.BarEntry;
+import com.github.mikephil.charting.data.Entry;
+import com.github.mikephil.charting.data.LineData;
+import com.github.mikephil.charting.data.LineDataSet;
+import com.github.mikephil.charting.interfaces.datasets.IBarDataSet;
+import com.github.mikephil.charting.interfaces.datasets.ILineDataSet;
+import com.github.mikephil.charting.utils.ColorTemplate;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.learn2crack.R;
+
 
 import java.io.IOException;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
-import java.util.concurrent.ThreadLocalRandom;
 
 import retrofit2.adapter.rxjava.HttpException;
 import rx.android.schedulers.AndroidSchedulers;
@@ -62,28 +72,26 @@ public class ReportingActivity extends AppCompatActivity
 
     private SharedPreferences mSharedPreferences;
     private CompositeSubscription mSubscriptions;
-    private List<Stats> stats;
+    private BarChart eventChart;
+    private BarChart categoryChart;
+    private BarChart actionChart;
+
 
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         initSharedPreferences();
         mSubscriptions = new CompositeSubscription();
+
         initialisationProcess();
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main2);
+
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                //Snackbar.make(view, "Updating....", Snackbar.LENGTH_LONG)
-                //      .setAction("Action", null).show();
-                initialisationProcess();
-            }
-        });
+        fab.setOnClickListener(view -> initialisationProcess());
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
@@ -93,17 +101,6 @@ public class ReportingActivity extends AppCompatActivity
 
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
-
-
-        /**GraphView graph = (GraphView) findViewById(R.id.graph1);
-        LineGraphSeries<DataPoint> series = new LineGraphSeries<>(new DataPoint[] {
-                new DataPoint(0, 1),
-                new DataPoint(1, 5),
-                new DataPoint(2, 3),
-                new DataPoint(3, 2),
-                new DataPoint(4, 6)
-        });
-        graph.addSeries(series);*/
 
 
         ConstraintLayout eventLayout = (ConstraintLayout) findViewById(R.id.eventLayout);
@@ -157,7 +154,6 @@ public class ReportingActivity extends AppCompatActivity
                 }catch (NullPointerException exception) {
 
                 }
-                Log.println(Log.INFO,"PROJETC SPINNER:", String.valueOf("NEW PROJECT SELECTED"));
                 initialisationProcess();
             }
 
@@ -175,7 +171,6 @@ public class ReportingActivity extends AppCompatActivity
                 try {
                     if (!mSharedPreferences.getString(Constants.EVENTSELECTED, null).equals(selected)) {
                         mSharedPreferences.edit().putString(Constants.EVENTSELECTED, selected).apply();
-                        Log.println(Log.INFO, "EVENT SPINNER:", String.valueOf("NEW EVENT SELECTED"));
                         initialisationProcess();
                     }
                 }catch (NullPointerException exception){
@@ -199,7 +194,6 @@ public class ReportingActivity extends AppCompatActivity
                 try {
                     if (!mSharedPreferences.getString(Constants.CATEGORYSELECTED, null).equals(selected)) {
                         mSharedPreferences.edit().putString(Constants.CATEGORYSELECTED, selected).apply();
-                        Log.println(Log.INFO, "CATEGORY SPINNER:", String.valueOf("NEW CATEGORY SELECTED"));
                         initialisationProcess();
                     }
                 }catch (NullPointerException exception){
@@ -222,7 +216,6 @@ public class ReportingActivity extends AppCompatActivity
                 try {
                     if (!mSharedPreferences.getString(Constants.ACTIONSELECTED, null).equals(selected)) {
                         mSharedPreferences.edit().putString(Constants.ACTIONSELECTED, selected).apply();
-                        Log.println(Log.INFO, "ACTION SPINNER:", String.valueOf("NEW ACTION SELECTED"));
                         initialisationProcess();
                     }
                 }catch (NullPointerException exception){
@@ -243,6 +236,15 @@ public class ReportingActivity extends AppCompatActivity
     }
 
     private void initialisationProcess() {
+
+        //Update widget
+        Context context = this;
+        AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(context);
+        RemoteViews remoteViews = new RemoteViews(context.getPackageName(), R.layout.new_app_widget);
+        ComponentName thisWidget = new ComponentName(context, NewAppWidget.class);
+        remoteViews.setTextViewText(R.id.widgetProjectTitle, "Project:" + mSharedPreferences.getString(Constants.PROJECTSELECTED,null));
+        appWidgetManager.updateAppWidget(thisWidget, remoteViews);
+
 
         String idSave = mSharedPreferences.getString(Constants.ID, "0");
         BigInteger id = BigInteger.valueOf(Integer.parseInt(idSave));
@@ -267,8 +269,6 @@ public class ReportingActivity extends AppCompatActivity
     @TargetApi(Build.VERSION_CODES.M)
     private void handleResponse(ProjectList projects) {
 
-        //Log.println(Log.INFO,"PROJECTS_OWN", "*****" + projects.getProjectOwn() + "**************************");
-        //Log.println(Log.INFO,"PROJECTS_COLLABORATIONS", "*****" + projects.getCollaborations() + "**************************");
 
         List <Project> projectOwn = projects.getProjectOwn();
         List <Project> projectCollaborations = projects.getCollaborations();
@@ -409,19 +409,16 @@ public class ReportingActivity extends AppCompatActivity
 
 
         if(spinnerEvent.getSelectedItem() == null || !eventNames.contains(spinnerEvent.getSelectedItem().toString())) {
-            Log.println(Log.INFO,"UPDATING STATS SPINNER:", "1");
             initStatsSpinners(eventNames,categoryNames,actionNames);
         }
         //initStatsSpinners(eventNames,categoryNames,actionNames);
         if(spinnerEvent.getSelectedItem() != null ) {
-            Log.println(Log.INFO,"UPDATING STATS SPINNER:", "2");
             updateEventStats(stats, spinnerEvent.getSelectedItem().toString());
             updateCategoryStats(stats, spinnerCategory.getSelectedItem().toString());
             updateActionStats(stats, spinnerAction.getSelectedItem().toString());
             //initStatsSpinners(eventNames,categoryNames,actionNames);
         }
         else{
-            Log.println(Log.INFO,"UPDATING STATS SPINNER:", "3");
             updateEventStats(stats, "");
             updateCategoryStats(stats, "");
             updateActionStats(stats, "");
@@ -429,7 +426,7 @@ public class ReportingActivity extends AppCompatActivity
     }
 
     private void initStatsSpinners(List <String> eventNames, List <String> categoryNames, List <String> actionNames) {
-        Log.println(Log.INFO,"UPDATING STATS SPINNER:", "------------------------");
+
 
         Spinner spinnerEvent = (Spinner) findViewById(R.id.spinnerEvent);
         Spinner spinnerCategory = (Spinner) findViewById(R.id.spinnerCategory);
@@ -442,11 +439,9 @@ public class ReportingActivity extends AppCompatActivity
         List<String> categories = categoryNames;
         List<String> actions = actionNames;
         String selectedevent = mSharedPreferences.getString(Constants.EVENTSELECTED,null);
-        Log.println(Log.INFO,"UPDATING STATS SPINNER:", "******************"+ selectedevent+ "******************" );
         String selectedcategory = mSharedPreferences.getString(Constants.CATEGORYSELECTED,null);
-        Log.println(Log.INFO,"UPDATING STATS SPINNER:", "*****************" + selectedcategory + "*****************");
         String selectedaction = mSharedPreferences.getString(Constants.ACTIONSELECTED,null);
-        Log.println(Log.INFO,"UPDATING STATS SPINNER:", "*****************" + selectedaction + "******************");
+
 
         if(eventNames.contains(selectedevent) && eventNames.size() >= 1){
             events.remove(selectedevent);
@@ -483,12 +478,10 @@ public class ReportingActivity extends AppCompatActivity
             spinnerCategory.setAdapter(adapter2);
         }
         if(selectedaction != null) {
-            Log.println(Log.INFO,"UPDATING STATS SPINNER:", "*****************IFFFFFFFFF******************");
             ArrayAdapter<String> adapter3 = new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item, actions);
             spinnerAction.setAdapter(adapter3);
 
         } else {
-            Log.println(Log.INFO,"UPDATING STATS SPINNER:", "*****************ELSEEEEEEE******************");
             ArrayAdapter<String> adapter3 = new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item, actionNames);
             spinnerAction.setAdapter(adapter3);
 
@@ -519,6 +512,43 @@ public class ReportingActivity extends AppCompatActivity
         eventTodayNb.setText(String.valueOf(todayEvents));
         eventWeekNb.setText(String.valueOf(thisWeekEvents));
         eventMontNb.setText(String.valueOf(thisMonthEvents));
+
+        //Update widget
+        Context context = this;
+        AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(context);
+        RemoteViews remoteViews = new RemoteViews(context.getPackageName(), R.layout.new_app_widget);
+        ComponentName thisWidget = new ComponentName(context, NewAppWidget.class);
+        remoteViews.setTextViewText(R.id.widgetEventTitle, "Event: " + mSharedPreferences.getString(Constants.EVENTSELECTED,null));
+        remoteViews.setTextViewText(R.id.widgetEventStats, allEvents + " - " + thisMonthEvents + " - " +
+        thisWeekEvents + " - " + todayEvents);
+        appWidgetManager.updateAppWidget(thisWidget, remoteViews);
+
+        initEventChart(todayEvents, thisWeekEvents, thisMonthEvents, allEvents, eventName);
+    }
+
+    private void initEventChart(long today, long week, long month, long all, String eventName) {
+        eventChart = (BarChart) findViewById(R.id.eventChart);
+        eventChart.setDrawBarShadow(false);
+        eventChart.setDrawValueAboveBar(true);
+        eventChart.setMaxVisibleValueCount(50);
+        eventChart.setPinchZoom(false);
+        eventChart.setDrawGridBackground(false);
+
+        ArrayList<BarEntry> barEntries = new ArrayList<>();
+
+        barEntries.add(new BarEntry(1,today));
+        barEntries.add(new BarEntry(2,week));
+        barEntries.add(new BarEntry(3,month));
+        barEntries.add(new BarEntry(4,all));
+
+        BarDataSet barDataSet = new BarDataSet(barEntries, "Today - This Week - This Month - All\tEvent:" + eventName);
+        barDataSet.setColors(ColorTemplate.COLORFUL_COLORS);
+
+        BarData data = new BarData(barDataSet);
+        data.setBarWidth(0.9f);
+
+        eventChart.setData(data);
+
     }
 
     private void updateCategoryStats(List<Stats> stats, String categoryName) {
@@ -538,6 +568,45 @@ public class ReportingActivity extends AppCompatActivity
         categoryTodayNb.setText(String.valueOf(todayEvents));
         categoryWeekNb.setText(String.valueOf(thisWeekEvents));
         categoryMontNb.setText(String.valueOf(thisMonthEvents));
+
+        //Update widget
+        Context context = this;
+        AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(context);
+        RemoteViews remoteViews = new RemoteViews(context.getPackageName(), R.layout.new_app_widget);
+        ComponentName thisWidget = new ComponentName(context, NewAppWidget.class);
+        remoteViews.setTextViewText(R.id.widgetCategoryTitle, "Category: " + mSharedPreferences.getString(Constants.CATEGORYSELECTED,null));
+        remoteViews.setTextViewText(R.id.widgetCategoryStats, allEvents + " - " + thisMonthEvents + " - " +
+                thisWeekEvents + " - " + todayEvents);
+        appWidgetManager.updateAppWidget(thisWidget, remoteViews);
+
+        initCategoryChart(todayEvents, thisWeekEvents, thisMonthEvents, allEvents, categoryName);
+
+
+    }
+
+    private void initCategoryChart(long today, long week, long month, long all, String categoryName) {
+        categoryChart = (BarChart) findViewById(R.id.categoryChart);
+        categoryChart.setDrawBarShadow(false);
+        categoryChart.setDrawValueAboveBar(true);
+        categoryChart.setMaxVisibleValueCount(50);
+        categoryChart.setPinchZoom(false);
+        categoryChart.setDrawGridBackground(false);
+
+        ArrayList<BarEntry> barEntries = new ArrayList<>();
+
+        barEntries.add(new BarEntry(1,today));
+        barEntries.add(new BarEntry(2,week));
+        barEntries.add(new BarEntry(3,month));
+        barEntries.add(new BarEntry(4,all));
+
+        BarDataSet barDataSet = new BarDataSet(barEntries, "Today - This Week - This Month - All\tCategory:" + categoryName);
+        barDataSet.setColors(ColorTemplate.COLORFUL_COLORS);
+
+        BarData data = new BarData(barDataSet);
+        data.setBarWidth(0.9f);
+
+        categoryChart.setData(data);
+
     }
 
     private void updateActionStats(List<Stats> stats, String actionName) {
@@ -557,6 +626,16 @@ public class ReportingActivity extends AppCompatActivity
         actionTodayNb.setText(String.valueOf(todayAction));
         actionWeekNb.setText(String.valueOf(thisWeekAction));
         actionMontNb.setText(String.valueOf(thisMonthAction));
+
+        //Update widget
+        Context context = this;
+        AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(context);
+        RemoteViews remoteViews = new RemoteViews(context.getPackageName(), R.layout.new_app_widget);
+        ComponentName thisWidget = new ComponentName(context, NewAppWidget.class);
+        remoteViews.setTextViewText(R.id.widgetActionTitle, "Action: " + mSharedPreferences.getString(Constants.ACTIONSELECTED,null));
+        remoteViews.setTextViewText(R.id.widgetActionStats, allAction + " - " + thisMonthAction + " - " +
+                thisWeekAction + " - " + todayAction);
+        appWidgetManager.updateAppWidget(thisWidget, remoteViews);
     }
 
 
@@ -584,12 +663,6 @@ public class ReportingActivity extends AppCompatActivity
         } else {
             Log.println(Log.ERROR,"ERRORSTAT2",error.toString() );
         }
-    }
-
-
-    public void onSnapGraph(View view){
-        /**GraphView graph = (GraphView) findViewById(R.id.graph1);
-        graph.takeSnapshotAndShare(this, "exampleGraph", "GraphViewSnapshot");*/
     }
 
 
@@ -637,13 +710,13 @@ public class ReportingActivity extends AppCompatActivity
         int id = item.getItemId();
 
         if (id == R.id.nav_main_menu) {
-            /**Intent intent = new Intent(this, ReportingActivity.class);
-            startActivity(intent);*/
+
         } else if (id == R.id.nav_manage) {
             Intent intent = new Intent(this, ManageActivity.class);
             startActivity(intent);
         } else if (id == R.id.nav_help) {
-
+            Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/manuelmederos95/FinalProjectAndroid/tree/master"));
+            startActivity(intent);
         } else if (id == R.id.nav_logout) {
             Intent intent = new Intent(this, MainActivity.class);
             startActivity(intent);

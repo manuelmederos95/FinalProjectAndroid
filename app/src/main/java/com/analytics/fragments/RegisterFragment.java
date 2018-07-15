@@ -16,14 +16,12 @@ import android.widget.TextView;
 
 import com.analytics.model.Response;
 import com.analytics.model.User;
+import com.analytics.network.NetworkUtil;
 import com.analytics.utils.Constants;
 import com.analytics.utils.Validation;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.learn2crack.R;
-import com.analytics.network.NetworkUtil;
-
-import java.io.IOException;
+import com.analytics.R;
 
 import retrofit2.adapter.rxjava.HttpException;
 import rx.android.schedulers.AndroidSchedulers;

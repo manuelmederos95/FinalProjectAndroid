@@ -2,11 +2,16 @@ package com.analytics.fragments;
 
 import android.app.Fragment;
 import android.app.FragmentTransaction;
+import android.appwidget.AppWidgetManager;
+import android.content.ComponentName;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
+import android.support.annotation.RequiresApi;
 import android.support.design.widget.Snackbar;
 import android.support.design.widget.TextInputLayout;
 import android.util.Log;
@@ -16,8 +21,10 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ProgressBar;
+import android.widget.RemoteViews;
 import android.widget.TextView;
 
+import com.analytics.NewAppWidget;
 import com.analytics.ReportingActivity;
 import com.analytics.model.Response;
 import com.analytics.model.User;
@@ -26,7 +33,7 @@ import com.analytics.utils.Constants;
 import com.analytics.utils.Validation;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.learn2crack.R;
+import com.analytics.R;
 
 import java.io.IOException;
 
@@ -124,26 +131,16 @@ public class LoginFragment extends Fragment {
 
     private void loginProcess(String email, String password) {
 
-        //mSubscriptions.add(NetworkUtil.getRetrofit(email, password).login()
         mSubscriptions.add(NetworkUtil.getRetrofit(Constants.SIGN_URL).login(email, password)
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeOn(Schedulers.io())
                 .subscribe(this::handleResponse,this::handleError));
 
-        /**if(email.equals("manuel.mederos95@gmail.com") && password.equals("Red.foul1")) {
-            Intent intent = new Intent(getActivity(), ReportingActivity.class);
-            startActivity(intent);
-        }
-        else{
-            AlertDialog alertDialog = new AlertDialog.Builder(getActivity()).create();
-            alertDialog.setTitle("Login Status");
-            alertDialog.setMessage("Wrong user or password");
-            alertDialog.show();
-        }*/
     }
 
 
 
+    @RequiresApi(api = Build.VERSION_CODES.M)
     private void handleResponse(User user) {
 
         mProgressBar.setVisibility(View.GONE);
@@ -154,10 +151,6 @@ public class LoginFragment extends Fragment {
         editor.putString(Constants.LASTNAME, user.getLastName());
         editor.putString(Constants.FIRSTNAME, user.getFirstName());
         editor.apply();
-        //editor.putString(Constants.TOKEN,response.getToken());
-        //editor.putString(Constants.EMAIL,response.getMessage());
-        //User user = response.getUser();
-        //showSnackBarMessage(user.toString());
         mEtEmail.setText(null);
         mEtPassword.setText(null);
         Log.println(Log.INFO,"USERID",user.getId() + "");
@@ -166,15 +159,21 @@ public class LoginFragment extends Fragment {
         Log.println(Log.INFO,"USERFIRSTNAME",user.getFirstName() + "");
         Log.println(Log.INFO,"USEREMAIL",user.getEmail() + "");
 
-        //Log.println(Log.INFO,"TOKEN",response.getToken());
 
-
+        //Update widget
+        Context context = this.getContext();
+        AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(context);
+        RemoteViews remoteViews = new RemoteViews(context.getPackageName(), R.layout.new_app_widget);
+        ComponentName thisWidget = new ComponentName(context, NewAppWidget.class);
+        remoteViews.setViewVisibility(R.id.alert, View.INVISIBLE);
+        appWidgetManager.updateAppWidget(thisWidget, remoteViews);
 
         Intent intent = new Intent(getActivity(), ReportingActivity.class);
         startActivity(intent);
 
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.M)
     private void handleError(Throwable error) {
 
         mProgressBar.setVisibility(View.GONE);
@@ -187,17 +186,26 @@ public class LoginFragment extends Fragment {
 
                 String errorBody = ((HttpException) error).response().errorBody().string();
                 Response response = gson.fromJson(errorBody,Response.class);
-                //showSnackBarMessage(response.getMessage());
-                //showSnackBarMessage("Response Error !");
-                showSnackBarMessage(errorBody);
+                showSnackBarMessage(response.getError());
 
             } catch (IOException e) {
                 e.printStackTrace();
             }
         } else {
 
-            showSnackBarMessage(error.toString());
+            showSnackBarMessage("Network Error!");
         }
+
+        //Update widget
+        Context context = this.getContext();
+        AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(context);
+        RemoteViews remoteViews = new RemoteViews(context.getPackageName(), R.layout.new_app_widget);
+        ComponentName thisWidget = new ComponentName(context, NewAppWidget.class);
+        remoteViews.setViewVisibility(R.id.alert, View.VISIBLE);
+        appWidgetManager.updateAppWidget(thisWidget, remoteViews);
+
+
+
     }
 
     private void showSnackBarMessage(String message) {

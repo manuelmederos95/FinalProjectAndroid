@@ -6,7 +6,6 @@ import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.TextInputLayout;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -18,14 +17,12 @@ import android.widget.TextView;
 import com.analytics.MainActivity;
 import com.analytics.model.Response;
 import com.analytics.model.User;
+import com.analytics.network.NetworkUtil;
 import com.analytics.utils.Constants;
 import com.analytics.utils.Validation;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.learn2crack.R;
-import com.analytics.network.NetworkUtil;
-
-import java.io.IOException;
+import com.analytics.R;
 
 import retrofit2.adapter.rxjava.HttpException;
 import rx.android.schedulers.AndroidSchedulers;
@@ -156,7 +153,6 @@ public class ResetPasswordDialog extends DialogFragment {
             User user = new User();
             user.setPassword(password);
             user.setToken(token);
-            //resetPasswordFinishProgress(user);
         }
     }
 
@@ -168,16 +164,8 @@ public class ResetPasswordDialog extends DialogFragment {
                 .subscribe(this::handleResponse,this::handleError));
     }
 
-    /**private void resetPasswordFinishProgress(User user) {
-
-        mSubscriptions.add(NetworkUtil.getRetrofit(Constants.SIGN_URL).resetPasswordFinish(mEmail,user)
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribeOn(Schedulers.io())
-                .subscribe(this::handleResponse,this::handleError));
-    }*/
 
     private void handleResponse(Response response) {
-        Log.println(Log.INFO,"REACH:", "***********");
         mProgressBar.setVisibility(View.GONE);
 
         if (isInit) {

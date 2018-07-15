@@ -7,11 +7,9 @@ import android.support.v7.app.AppCompatActivity;
 
 import com.analytics.fragments.LoginFragment;
 import com.analytics.fragments.ResetPasswordDialog;
-import com.learn2crack.R;
 
 public class MainActivity extends AppCompatActivity implements ResetPasswordDialog.Listener {
 
-    public static final String TAG = MainActivity.class.getSimpleName();
 
     private LoginFragment mLoginFragment;
     private ResetPasswordDialog mResetPasswordDialog;
@@ -39,9 +37,6 @@ public class MainActivity extends AppCompatActivity implements ResetPasswordDial
     @Override
     protected void onNewIntent(Intent intent) {
         super.onNewIntent(intent);
-
-        /**String data = intent.getData().getLastPathSegment();
-        Log.d(TAG, "onNewIntent: "+data);*/
         String data = " ";
 
         mResetPasswordDialog = (ResetPasswordDialog) getFragmentManager().findFragmentByTag(ResetPasswordDialog.TAG);

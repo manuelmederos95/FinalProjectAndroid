@@ -10,4 +10,5 @@ public class Response {
     public String getError(){
         return error;
     }
+
 }
