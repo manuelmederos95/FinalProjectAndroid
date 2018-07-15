@@ -33,14 +33,6 @@ public class ManageActivity extends AppCompatActivity
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        /**FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
-            }
-        });*/
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
@@ -51,7 +43,15 @@ public class ManageActivity extends AppCompatActivity
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
+        initCheckBoxes();
 
+    }
+
+    private void initSharedPreferences() {
+        mSharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+    }
+
+    private void initCheckBoxes(){
         CheckBox eventCheckBox = (CheckBox) findViewById(R.id.eventCheckBox);
         boolean checked = PreferenceManager.getDefaultSharedPreferences(this)
                 .getBoolean("eventCheckBox", false);
@@ -67,10 +67,20 @@ public class ManageActivity extends AppCompatActivity
                 .getBoolean("actionCheckBox", false);
         actionCheckBox.setChecked(checked2);
 
-    }
+        CheckBox eventChartCheckBox = (CheckBox) findViewById(R.id.eventChartCheckBox);
+        boolean checked3 = PreferenceManager.getDefaultSharedPreferences(this)
+                .getBoolean("eventChartCheckBox", false);
+        eventChartCheckBox.setChecked(checked3);
 
-    private void initSharedPreferences() {
-        mSharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+        CheckBox categoryChartCheckBox = (CheckBox) findViewById(R.id.categoryChartCheckBox);
+        boolean checked4 = PreferenceManager.getDefaultSharedPreferences(this)
+                .getBoolean("categoryChartCheckBox", false);
+        categoryChartCheckBox.setChecked(checked4);
+
+        CheckBox actionChartCheckBox = (CheckBox) findViewById(R.id.actionChartCheckBox);
+        boolean checked5 = PreferenceManager.getDefaultSharedPreferences(this)
+                .getBoolean("actionChartCheckBox", false);
+        actionChartCheckBox.setChecked(checked5);
     }
 
     @Override
@@ -141,9 +151,15 @@ public class ManageActivity extends AppCompatActivity
         CheckBox eventCheckBox = (CheckBox) findViewById(R.id.eventCheckBox);
         CheckBox categoryCheckBox = (CheckBox) findViewById(R.id.categoryCheckBox);
         CheckBox actionCheckBox = (CheckBox) findViewById(R.id.actionCheckBox);
+        CheckBox eventChartCheckBox = (CheckBox) findViewById(R.id.eventChartCheckBox);
+        CheckBox categoryChartCheckBox = (CheckBox) findViewById(R.id.categoryChartCheckBox);
+        CheckBox actionChartCheckBox = (CheckBox) findViewById(R.id.actionChartCheckBox);
         PreferenceManager.getDefaultSharedPreferences(this).edit().putBoolean("eventCheckBox",eventCheckBox.isChecked()).commit();
         PreferenceManager.getDefaultSharedPreferences(this).edit().putBoolean("categoryCheckBox",categoryCheckBox.isChecked()).commit();
         PreferenceManager.getDefaultSharedPreferences(this).edit().putBoolean("actionCheckBox",actionCheckBox.isChecked()).commit();
+        PreferenceManager.getDefaultSharedPreferences(this).edit().putBoolean("eventChartCheckBox",eventChartCheckBox.isChecked()).commit();
+        PreferenceManager.getDefaultSharedPreferences(this).edit().putBoolean("categoryChartCheckBox",categoryChartCheckBox.isChecked()).commit();
+        PreferenceManager.getDefaultSharedPreferences(this).edit().putBoolean("actionChartCheckBox",actionChartCheckBox.isChecked()).commit();
 
 
         Toast.makeText(this, "Saved",

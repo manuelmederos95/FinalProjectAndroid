@@ -31,24 +31,18 @@ import android.widget.TextView;
 
 import com.analytics.model.Project;
 import com.analytics.model.ProjectList;
+import com.analytics.model.Response;
 import com.analytics.model.Stats;
 import com.analytics.network.NetworkUtil;
 import com.analytics.utils.Constants;
 import com.analytics.utils.StatsCount;
 import com.github.mikephil.charting.charts.BarChart;
-import com.github.mikephil.charting.charts.LineChart;
 import com.github.mikephil.charting.data.BarData;
 import com.github.mikephil.charting.data.BarDataSet;
 import com.github.mikephil.charting.data.BarEntry;
-import com.github.mikephil.charting.data.Entry;
-import com.github.mikephil.charting.data.LineData;
-import com.github.mikephil.charting.data.LineDataSet;
-import com.github.mikephil.charting.interfaces.datasets.IBarDataSet;
-import com.github.mikephil.charting.interfaces.datasets.ILineDataSet;
 import com.github.mikephil.charting.utils.ColorTemplate;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-
 
 import java.io.IOException;
 import java.math.BigInteger;
@@ -59,11 +53,6 @@ import retrofit2.adapter.rxjava.HttpException;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 import rx.subscriptions.CompositeSubscription;
-
-/**import com.jjoe64.graphview.GraphView;
-import com.jjoe64.graphview.series.DataPoint;
-import com.jjoe64.graphview.series.LineGraphSeries;*/
-
 
 
 
@@ -103,6 +92,12 @@ public class ReportingActivity extends AppCompatActivity
         navigationView.setNavigationItemSelectedListener(this);
 
 
+        setLayoutsVisibility();
+        setSpinnerListenners();
+
+    }
+
+    private void setLayoutsVisibility() {
         ConstraintLayout eventLayout = (ConstraintLayout) findViewById(R.id.eventLayout);
         boolean checked = PreferenceManager.getDefaultSharedPreferences(this)
                 .getBoolean("eventCheckBox", false);
@@ -133,7 +128,35 @@ public class ReportingActivity extends AppCompatActivity
             actionLayout.setVisibility(View.VISIBLE);
         }
 
-        setSpinnerListenners();
+        eventChart = (BarChart) findViewById(R.id.eventChart);
+        boolean checked3 = PreferenceManager.getDefaultSharedPreferences(this)
+                .getBoolean("eventChartCheckBox", false);
+        if(checked3 == false) {
+            eventChart.setVisibility(View.GONE);
+        }
+        else{
+            eventChart.setVisibility(View.VISIBLE);
+        }
+
+        categoryChart = (BarChart) findViewById(R.id.categoryChart);
+        boolean checked4 = PreferenceManager.getDefaultSharedPreferences(this)
+                .getBoolean("categoryChartCheckBox", false);
+        if(checked4 == false) {
+            categoryChart.setVisibility(View.GONE);
+        }
+        else{
+            categoryChart.setVisibility(View.VISIBLE);
+        }
+
+        actionChart = (BarChart) findViewById(R.id.actionChart);
+        boolean checked5 = PreferenceManager.getDefaultSharedPreferences(this)
+                .getBoolean("actionChartCheckBox", false);
+        if(checked5 == false) {
+            actionChart.setVisibility(View.GONE);
+        }
+        else{
+            actionChart.setVisibility(View.VISIBLE);
+        }
 
     }
 
@@ -147,9 +170,6 @@ public class ReportingActivity extends AppCompatActivity
                 try {
                     if (!mSharedPreferences.getString(Constants.PROJECTSELECTED, null).equals(selected)) {
                         mSharedPreferences.edit().putString(Constants.PROJECTSELECTED, selected).apply();
-                        //mSharedPreferences.edit().putString(Constants.EVENTSELECTED, null).apply();
-                        //mSharedPreferences.edit().putString(Constants.CATEGORYSELECTED, null).apply();
-                        //mSharedPreferences.edit().putString(Constants.ACTIONSELECTED, null).apply();
                     }
                 }catch (NullPointerException exception) {
 
@@ -174,7 +194,6 @@ public class ReportingActivity extends AppCompatActivity
                         initialisationProcess();
                     }
                 }catch (NullPointerException exception){
-                        //String event = (String) adapterView.getItemAtPosition(i);
                         mSharedPreferences.edit().putString(Constants.EVENTSELECTED, selected).apply();
                         initialisationProcess();
                 }
@@ -275,29 +294,20 @@ public class ReportingActivity extends AppCompatActivity
         List<String> projectNames = new ArrayList<>();
         if(projectOwn.size() != 0) {
             for (Project project: projectOwn) {
-                //Log.println(Log.INFO,"ID:", String.valueOf(project.getId()));
-                //Log.println(Log.INFO,"NAME:", project.getName());
-                //Log.println(Log.INFO,"URL_FOLLOWED:", project.getUrlfollowed());
                 projectNames.add(project.getName());
             }
         }
         if(projectCollaborations.size() != 0) {
             for (Project project: projectCollaborations) {
-                //Log.println(Log.INFO,"ID:", String.valueOf(project.getId()));
-                //Log.println(Log.INFO,"NAME:", project.getName());
-                //Log.println(Log.INFO,"URL_FOLLOWED:", project.getUrlfollowed());
                 projectNames.add(project.getName());
             }
         }
 
 
 
-        //Project projectSelected = selectedProject(projects);
-        //initialiseStats(projectSelected);
         if (mSharedPreferences.getString(Constants.PROJECTSELECTED, null) == null)
             mSharedPreferences.edit().putString(Constants.PROJECTSELECTED, "").apply();
         Spinner spinnerProjects = (Spinner) findViewById(R.id.spinnerProjects);
-        Log.println(Log.INFO,"ITEM AT 0:", String.valueOf(spinnerProjects.getItemAtPosition(0)));
         if(spinnerProjects.getItemAtPosition(0) == null) initProjectSpinner(projectNames);
         if(mSharedPreferences.getString(Constants.PROJECTSELECTED, null).equals(null)) {
             String selected = spinnerProjects.getSelectedItem().toString();
@@ -305,7 +315,6 @@ public class ReportingActivity extends AppCompatActivity
         }
 
         initialiseStats(selectedProject(projects));
-        //initialiseStats(projectOwn.get(0));
 
     }
 
@@ -348,23 +357,18 @@ public class ReportingActivity extends AppCompatActivity
             try {
 
                 String errorBody = ((HttpException) error).response().errorBody().string();
-                //Response response = gson.fromJson(errorBody,Response.class);
-                //showSnackBarMessage(response.getMessage());
-                //showSnackBarMessage("Response Error !");
-                Log.println(Log.ERROR,"ERROR1",errorBody );
+                Response response = gson.fromJson(errorBody,Response.class);
+                Log.println(Log.ERROR,"ERROR",response.getError() );
 
             } catch (IOException e) {
                 e.printStackTrace();
             }
         } else {
-            Log.println(Log.ERROR,"ERROR2-PROJECT",error.toString() );
+
         }
     }
 
     private void initialiseStats(Project project) {
-        //Log.println(Log.INFO, "STAT", "*******************************************");
-        //Log.println(Log.INFO, "STATID", String.valueOf(project.getId()));
-        //Log.println(Log.INFO, "STATNAME", String.valueOf(project.getName()));
         mSubscriptions.add(NetworkUtil.getRetrofit(Constants.PROJECTS_URL).getAllStats(project.getId())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeOn(Schedulers.io())
@@ -380,13 +384,6 @@ public class ReportingActivity extends AppCompatActivity
         List<String> actionNames = new ArrayList<>();
 
         for (Stats stat: stats) {
-            /**Log.println(Log.INFO,"ID:", String.valueOf(stat.getId()));
-            Log.println(Log.INFO,"BASEURL:", stat.getBaseurl());
-            Log.println(Log.INFO,"ROUTE:", stat.getRoute());
-            Log.println(Log.INFO,"EVENTNAME:", stat.getEventname());
-            Log.println(Log.INFO,"CATEGORY:", stat.getCategory());
-            Log.println(Log.INFO,"ACTION:", stat.getAction());
-            Log.println(Log.INFO,"DATE:", stat.getCreatedAt());*/
             if(!eventNames.contains(stat.getEventname())) eventNames.add(stat.getEventname());
             if(!categoryNames.contains(stat.getCategory())) categoryNames.add(stat.getCategory());
             if(!actionNames.contains(stat.getAction())) actionNames.add(stat.getAction());
@@ -411,12 +408,11 @@ public class ReportingActivity extends AppCompatActivity
         if(spinnerEvent.getSelectedItem() == null || !eventNames.contains(spinnerEvent.getSelectedItem().toString())) {
             initStatsSpinners(eventNames,categoryNames,actionNames);
         }
-        //initStatsSpinners(eventNames,categoryNames,actionNames);
+
         if(spinnerEvent.getSelectedItem() != null ) {
             updateEventStats(stats, spinnerEvent.getSelectedItem().toString());
             updateCategoryStats(stats, spinnerCategory.getSelectedItem().toString());
             updateActionStats(stats, spinnerAction.getSelectedItem().toString());
-            //initStatsSpinners(eventNames,categoryNames,actionNames);
         }
         else{
             updateEventStats(stats, "");
@@ -636,8 +632,34 @@ public class ReportingActivity extends AppCompatActivity
         remoteViews.setTextViewText(R.id.widgetActionStats, allAction + " - " + thisMonthAction + " - " +
                 thisWeekAction + " - " + todayAction);
         appWidgetManager.updateAppWidget(thisWidget, remoteViews);
+
+        initActionChart(todayAction, thisWeekAction, thisMonthAction, allAction, actionName);
     }
 
+    private void initActionChart(long today, long week, long month, long all, String actionName) {
+        actionChart = (BarChart) findViewById(R.id.actionChart);
+        actionChart.setDrawBarShadow(false);
+        actionChart.setDrawValueAboveBar(true);
+        actionChart.setMaxVisibleValueCount(50);
+        actionChart.setPinchZoom(false);
+        actionChart.setDrawGridBackground(false);
+
+        ArrayList<BarEntry> barEntries = new ArrayList<>();
+
+        barEntries.add(new BarEntry(1,today));
+        barEntries.add(new BarEntry(2,week));
+        barEntries.add(new BarEntry(3,month));
+        barEntries.add(new BarEntry(4,all));
+
+        BarDataSet barDataSet = new BarDataSet(barEntries, "Today - This Week - This Month - All\tAction:" + actionName);
+        barDataSet.setColors(ColorTemplate.COLORFUL_COLORS);
+
+        BarData data = new BarData(barDataSet);
+        data.setBarWidth(0.9f);
+
+        actionChart.setData(data);
+
+    }
 
 
 

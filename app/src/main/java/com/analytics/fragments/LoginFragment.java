@@ -14,7 +14,6 @@ import android.support.annotation.Nullable;
 import android.support.annotation.RequiresApi;
 import android.support.design.widget.Snackbar;
 import android.support.design.widget.TextInputLayout;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -25,6 +24,7 @@ import android.widget.RemoteViews;
 import android.widget.TextView;
 
 import com.analytics.NewAppWidget;
+import com.analytics.R;
 import com.analytics.ReportingActivity;
 import com.analytics.model.Response;
 import com.analytics.model.User;
@@ -33,7 +33,6 @@ import com.analytics.utils.Constants;
 import com.analytics.utils.Validation;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.analytics.R;
 
 import java.io.IOException;
 
@@ -153,12 +152,6 @@ public class LoginFragment extends Fragment {
         editor.apply();
         mEtEmail.setText(null);
         mEtPassword.setText(null);
-        Log.println(Log.INFO,"USERID",user.getId() + "");
-        Log.println(Log.INFO,"USERACCOUNTLEVEL",user.getAccountLevel() + "");
-        Log.println(Log.INFO,"USERLASTNAME",user.getLastName() + "");
-        Log.println(Log.INFO,"USERFIRSTNAME",user.getFirstName() + "");
-        Log.println(Log.INFO,"USEREMAIL",user.getEmail() + "");
-
 
         //Update widget
         Context context = this.getContext();
