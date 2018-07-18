@@ -12,9 +12,14 @@ public class Constants {
     public static final String LASTNAME = "lastname";
     public static final String FIRSTNAME = "firstname";
     public static final String PROJECTSNAME= "PROJECTSNAME";
+    public static final String PROJECTIDSELECTED= "PROJECTID";
     public static final String PROJECTSELECTED = "PROJECTSELECTED";
     public static final String EVENTSELECTED = "EVENTSELECTED";
     public static final String CATEGORYSELECTED = "CATEGORYSELECTED";
     public static final String ACTIONSELECTED = "ACTIONSELECTED";
+    public static final String EVENTTODAY = "EVENTTODAY";
+    public static final String CATEGORYTODAY = "CATEGORYTODAY";
+    public static final String ACTIONTODAY = "ACTIONTODAY";
+
 
 }

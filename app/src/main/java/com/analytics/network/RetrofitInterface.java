@@ -18,7 +18,6 @@ public interface RetrofitInterface {
     @FormUrlEncoded
     @POST("loginfromandroid")
     Observable<User> login(@Field("email") String email, @Field("password") String password );
-    //Observable<Response> login();
 
 
     @FormUrlEncoded
@@ -29,14 +28,15 @@ public interface RetrofitInterface {
     @POST("getstatforandroid")
     Observable<List<Stats>> getAllStats(@Field("projectID") BigInteger projectID);
 
-    @FormUrlEncoded
-    @POST("getstatforandroid")
-    Observable<Response> signUp(@Field("firstname") String firstname,
-                                @Field("lastname") String lastname, @Field("email") String email,
-                                @Field("password") String password, @Field("password2") String password2 );
 
     @FormUrlEncoded
-    @POST("getstatforandroid")
+    @POST("signupfromandroid")
+    Observable<Response> signUp(@Field("firstname") String firstname,@Field("lastname") String lastname, @Field("email") String email,
+                                @Field("password") String password, @Field("password2") String password2 );
+
+
+    @FormUrlEncoded
+    @POST("forgotpassfromandroid")
     Observable<Response> resetPassword(@Field("email") String email);
 
 }

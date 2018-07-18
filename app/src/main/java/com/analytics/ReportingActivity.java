@@ -326,12 +326,14 @@ public class ReportingActivity extends AppCompatActivity
         if(selected.equals(null)) {
             if(projectOwn.size() != 0) {
                 mSharedPreferences.edit().putString(Constants.PROJECTSELECTED, projectOwn.get(0).getName());
+                mSharedPreferences.edit().putString(Constants.PROJECTSELECTED, String.valueOf(projectOwn.get(0).getId()));
                 return projectOwn.get(0);
             }
 
             else {
                 if(projectCollaborations.size() != 0) {
                     mSharedPreferences.edit().putString(Constants.PROJECTSELECTED, projectOwn.get(0).getName());
+                    mSharedPreferences.edit().putString(Constants.PROJECTSELECTED, String.valueOf(projectOwn.get(0).getId()));
                     return projectCollaborations.get(0);
                 }
             }
@@ -509,6 +511,8 @@ public class ReportingActivity extends AppCompatActivity
         eventWeekNb.setText(String.valueOf(thisWeekEvents));
         eventMontNb.setText(String.valueOf(thisMonthEvents));
 
+        mSharedPreferences.edit().putString(Constants.EVENTSELECTED, String.valueOf(todayEvents)).apply();
+
         //Update widget
         Context context = this;
         AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(context);
@@ -564,6 +568,8 @@ public class ReportingActivity extends AppCompatActivity
         categoryTodayNb.setText(String.valueOf(todayEvents));
         categoryWeekNb.setText(String.valueOf(thisWeekEvents));
         categoryMontNb.setText(String.valueOf(thisMonthEvents));
+
+        mSharedPreferences.edit().putString(Constants.CATEGORYSELECTED, String.valueOf(todayEvents)).apply();
 
         //Update widget
         Context context = this;
@@ -622,6 +628,8 @@ public class ReportingActivity extends AppCompatActivity
         actionTodayNb.setText(String.valueOf(todayAction));
         actionWeekNb.setText(String.valueOf(thisWeekAction));
         actionMontNb.setText(String.valueOf(thisMonthAction));
+
+        mSharedPreferences.edit().putString(Constants.ACTIONSELECTED, String.valueOf(todayAction)).apply();
 
         //Update widget
         Context context = this;

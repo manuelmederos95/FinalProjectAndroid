@@ -6,6 +6,7 @@ import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.TextInputLayout;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -172,9 +173,6 @@ public class ResetPasswordDialog extends DialogFragment {
 
             isInit = false;
             showMessage(response.getMsg());
-            mTiEmail.setVisibility(View.GONE);
-            mTiToken.setVisibility(View.VISIBLE);
-            mTiPassword.setVisibility(View.VISIBLE);
 
         } else {
 
@@ -195,14 +193,14 @@ public class ResetPasswordDialog extends DialogFragment {
 
                 String errorBody = ((HttpException) error).response().errorBody().string();
                 Response response = gson.fromJson(errorBody,Response.class);
-                showMessage(response.getMsg());
+                showMessage(response.getError());
 
             } catch (Exception e) {
                 e.printStackTrace();
                 showMessage("Network Error !");
             }
         } else {
-
+            error.printStackTrace();
             showMessage("Network Error !");
         }
     }

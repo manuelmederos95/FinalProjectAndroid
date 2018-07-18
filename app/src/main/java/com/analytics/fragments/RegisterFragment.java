@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.Snackbar;
 import android.support.design.widget.TextInputLayout;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -117,13 +118,9 @@ public class RegisterFragment extends Fragment {
 
         if (err == 0) {
 
-            User user = new User();
-            user.setLastName(name);
-            user.setEmail(email);
-            user.setPassword(password);
 
             mProgressbar.setVisibility(View.VISIBLE);
-            registerProcess(user);
+            registerProcess(name, lastname, email,password, password);
 
         } else {
 
@@ -139,12 +136,20 @@ public class RegisterFragment extends Fragment {
         mTiPassword.setError(null);
     }
 
-    private void registerProcess(User user) {
+    private void registerProcess(String firstname, String lastname, String email, String password, String password2) {
 
-        mSubscriptions.add(NetworkUtil.getRetrofit(Constants.SIGN_URL).signUp(user.getFirstName(),user.getLastName(),user.getEmail(),user.getPassword(),user.getPassword())
+        Log.println(Log.INFO,"FIRSTNAME",firstname );
+        Log.println(Log.INFO,"LASTNAME",lastname );
+        Log.println(Log.INFO,"EMAIL",email );
+        Log.println(Log.INFO,"PASSWORD",password );
+        Log.println(Log.INFO,"PASSWORD2",password2 );
+
+
+        mSubscriptions.add(NetworkUtil.getRetrofit(Constants.SIGN_URL).signUp(firstname,lastname,email,password, password2)
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeOn(Schedulers.io())
                 .subscribe(this::handleResponse,this::handleError));
+
     }
 
     private void handleResponse(Response response) {
@@ -164,16 +169,18 @@ public class RegisterFragment extends Fragment {
 
             try {
 
-                String errorBody = ((HttpException) error).response().errorBody().string();
-                Response response = gson.fromJson(errorBody,Response.class);
-                showSnackBarMessage(response.getMsg());
+                //String errorBody = ((HttpException) error).response().errorBody().string();
+                //Response response = gson.fromJson(errorBody,Response.class);
+                //showSnackBarMessage(response.getMsg());
+                Log.println(Log.ERROR,"ERROR",error.toString() );
+                showSnackBarMessage("Network Error !");
 
             } catch (Exception e) {
                 e.printStackTrace();
                 showSnackBarMessage("Network Error !");
             }
         } else {
-
+            error.printStackTrace();
             showSnackBarMessage("Network Error !");
         }
     }
